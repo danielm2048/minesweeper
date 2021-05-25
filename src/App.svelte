@@ -6,88 +6,92 @@
 	import Timer from "./Timer.svelte";
 
 	let gameStarted = false;
+	let difficulty = "easy";
 
-	let rows = 9;
-	let columns = 9;
-	let mines = 10;
+	$: rows = difficulty === "easy" ? 9 : difficulty === "medium" ? 16 : 30;
+	$: columns = difficulty === "easy" ? 9 : 16;
+	$: mines = difficulty === "easy" ? 10 : difficulty === "medium" ? 40 : 99;
 
 	let gameTiles = [];
 	let gameTilesClicked = 0;
 
-	for (let i = 0; i < rows; i++) {
-		let gameRow = [];
+	function gameInit() {
+		for (let i = 0; i < rows; i++) {
+			let gameRow = [];
 
-		for (let j = 0; j < columns; j++) {
-			gameRow.push({ component: GameTile, value: "", isClicked: false });
+			for (let j = 0; j < columns; j++) {
+				gameRow.push({ component: GameTile, value: "", isClicked: false });
+			}
+
+			gameTiles.push(gameRow);
 		}
 
-		gameTiles.push(gameRow);
-	}
+		for (let i = 0; i < mines; i++) {
+			let taken = true;
+			while (taken) {
+				const randomRow = Math.floor(Math.random() * rows);
+				const randomColumn = Math.floor(Math.random() * columns);
 
-	for (let i = 0; i < mines; i++) {
-		let taken = true;
-		while (taken) {
-			const randomRow = Math.floor(Math.random() * rows);
-			const randomColumn = Math.floor(Math.random() * columns);
-
-			taken = gameTiles[randomRow][randomColumn].value === "💣";
-			if (!taken) {
-				gameTiles[randomRow][randomColumn].value = "💣";
+				taken = gameTiles[randomRow][randomColumn].value === "💣";
+				if (!taken) {
+					gameTiles[randomRow][randomColumn].value = "💣";
+				}
 			}
 		}
-	}
 
-	for (let i = 0; i < rows; i++) {
-		for (let j = 0; j < columns; j++) {
-			let mineCount = 0;
+		for (let i = 0; i < rows; i++) {
+			for (let j = 0; j < columns; j++) {
+				let mineCount = 0;
 
-			if (gameTiles[i][j].value === "💣") {
-				continue;
-			}
+				if (gameTiles[i][j].value === "💣") {
+					continue;
+				}
 
-			if (
-				gameTiles[i - 1] &&
-				gameTiles[i - 1][j - 1] &&
-				gameTiles[i - 1][j - 1].value === "💣"
-			) {
-				mineCount++;
-			}
-			if (gameTiles[i][j - 1] && gameTiles[i][j - 1].value === "💣") {
-				mineCount++;
-			}
-			if (
-				gameTiles[i + 1] &&
-				gameTiles[i + 1][j - 1] &&
-				gameTiles[i + 1][j - 1].value === "💣"
-			) {
-				mineCount++;
-			}
-			if (gameTiles[i + 1] && gameTiles[i + 1][j].value === "💣") {
-				mineCount++;
-			}
-			if (
-				gameTiles[i + 1] &&
-				gameTiles[i + 1][j + 1] &&
-				gameTiles[i + 1][j + 1].value === "💣"
-			) {
-				mineCount++;
-			}
-			if (gameTiles[i][j + 1] && gameTiles[i][j + 1].value === "💣") {
-				mineCount++;
-			}
-			if (
-				gameTiles[i - 1] &&
-				gameTiles[i - 1][j + 1] &&
-				gameTiles[i - 1][j + 1].value === "💣"
-			) {
-				mineCount++;
-			}
-			if (gameTiles[i - 1] && gameTiles[i - 1][j].value === "💣") {
-				mineCount++;
-			}
+				if (
+					gameTiles[i - 1] &&
+					gameTiles[i - 1][j - 1] &&
+					gameTiles[i - 1][j - 1].value === "💣"
+				) {
+					mineCount++;
+				}
+				if (gameTiles[i][j - 1] && gameTiles[i][j - 1].value === "💣") {
+					mineCount++;
+				}
+				if (
+					gameTiles[i + 1] &&
+					gameTiles[i + 1][j - 1] &&
+					gameTiles[i + 1][j - 1].value === "💣"
+				) {
+					mineCount++;
+				}
+				if (gameTiles[i + 1] && gameTiles[i + 1][j].value === "💣") {
+					mineCount++;
+				}
+				if (
+					gameTiles[i + 1] &&
+					gameTiles[i + 1][j + 1] &&
+					gameTiles[i + 1][j + 1].value === "💣"
+				) {
+					mineCount++;
+				}
+				if (gameTiles[i][j + 1] && gameTiles[i][j + 1].value === "💣") {
+					mineCount++;
+				}
+				if (
+					gameTiles[i - 1] &&
+					gameTiles[i - 1][j + 1] &&
+					gameTiles[i - 1][j + 1].value === "💣"
+				) {
+					mineCount++;
+				}
+				if (gameTiles[i - 1] && gameTiles[i - 1][j].value === "💣") {
+					mineCount++;
+				}
 
-			gameTiles[i][j].value = mineCount || "";
+				gameTiles[i][j].value = mineCount || "";
+			}
 		}
+		gameStarted = true;
 	}
 
 	function revealTiles(i, j) {
@@ -119,20 +123,35 @@
 	$: if (gameTilesClicked === 71) {
 		gameState.update(() => "won");
 	}
+
+	function startOver() {
+		gameStarted = false;
+		gameState.update(() => "playing");
+		gameTiles = [];
+		gameTilesClicked = 0;
+	}
 </script>
 
 <main>
 	<h1>Svelte Minesweeper 👷‍♂️👷‍♀️</h1>
 
-	{#if $gameState === "lost"}
-		<h2>You Lost 👎</h2>
-	{:else if $gameState === "won"}
-		<h2>You Won 🙌</h2>
+	{#if $gameState !== "playing"}
+		<button on:click={startOver}>Start over?</button>
+		{#if $gameState === "lost"}
+			<h2>You Lost 👎</h2>
+		{:else if $gameState === "won"}
+			<h2>You Won 🙌</h2>
+		{/if}
 	{/if}
 
 	{#if !gameStarted}
-		<div class="game-button">
-			<button on:click={() => (gameStarted = true)}>Start Game!</button>
+		<div class="game-options">
+			<select bind:value={difficulty}>
+				<option value="easy">Easy</option>
+				<option value="medium">Medium</option>
+				<option value="hard">Hard</option>
+			</select>
+			<button on:click={gameInit}>Start Game!</button>
 		</div>
 	{:else}
 		<Timer />
@@ -162,8 +181,9 @@
 		margin: 10px auto;
 	}
 
-	.game-button {
+	.game-options {
 		display: flex;
+		flex-direction: column;
 		justify-content: center;
 		align-items: center;
 		min-height: 80vh;
