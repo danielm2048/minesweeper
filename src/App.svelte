@@ -5,6 +5,7 @@
 	import GameTile from "./GameTile.svelte";
 	import Timer from "./Timer.svelte";
 	import Size from "./Size.svelte";
+	import Instructions from "./Instructions.svelte";
 
 	let gameStarted = false;
 	let difficulty = "easy";
@@ -257,6 +258,7 @@
 	{#if !gameStarted}
 		<h1>Svelte Minesweeper 👷‍♂️👷‍♀️</h1>
 		<div class="game-options">
+			<Instructions />
 			<select bind:value={difficulty}>
 				<option value="easy">Easy</option>
 				<option value="medium">Medium</option>
