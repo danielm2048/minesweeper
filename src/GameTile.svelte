@@ -1,5 +1,5 @@
 <script>
-	import { gameState } from "./stores";
+	import { gameState, tileSize } from "./stores";
 	import { createEventDispatcher } from "svelte";
 
 	const dispatch = createEventDispatcher();
@@ -7,10 +7,10 @@
 	export let isBomb;
 	export let value;
 	export let isClicked;
+	export let isFlagged;
 	export let i;
 	export let j;
 
-	let isSelected = false;
 	let sign = "";
 
 	$: if ($gameState === "lost") {
@@ -24,7 +24,7 @@
 	}
 
 	const handleClick = () => {
-		if (!isSelected) {
+		if (!isFlagged) {
 			dispatch("reveal", {
 				i,
 				j,
@@ -33,31 +33,48 @@
 		}
 	};
 
-	const handleSelect = () => {
-		isSelected = !isSelected;
-		sign = isSelected ? "🚩" : "";
+	const handleRightClick = () => {
+		if (!isClicked) {
+			dispatch("flag", {
+				i,
+				j,
+				flagState: !isFlagged,
+			});
+			sign = !isFlagged ? "🚩" : "";
+		}
 	};
 
-	$: if (isClicked && isSelected) {
-		isSelected = false;
+	const handleDblClick = () => {
+		if (isClicked) {
+			dispatch("chord", {
+				i,
+				j,
+				value,
+			});
+		}
+	};
+
+	$: if (isClicked && isFlagged) {
 		sign = "";
 	}
 </script>
 
 <button
-	on:contextmenu|preventDefault={handleSelect}
+	on:contextmenu|preventDefault={handleRightClick}
 	on:click={handleClick}
-	disabled={$gameState !== "playing" || isClicked}
+	on:dblclick={handleDblClick}
+	disabled={$gameState !== "playing"}
 	class:isClicked
-	class={`number${value}`}
+	class:correct={isBomb && isFlagged && $gameState === "lost"}
+	class={`number${value} size${$tileSize}`}
 >
-	<div class:isSelected>{sign || (isClicked ? value : "")}</div>
+	<div class:isFlagged>{sign || (isClicked ? value : "")}</div>
 </button>
 
 <style>
 	button,
-	button:focus,
-	button:active {
+	button:not(.isClicked):focus,
+	button:not(.isClicked):active {
 		background-color: #319cc0;
 		width: 70px;
 		height: 70px;
@@ -76,7 +93,7 @@
 		-webkit-animation: popout 0.2s ease;
 	}
 
-	.isSelected {
+	.isFlagged {
 		animation: popout 0.1s ease-in-out;
 		-webkit-animation: popout 0.1s ease-in-out;
 	}
@@ -104,6 +121,10 @@
 		}
 	}
 
+	.correct {
+		border: 3px solid red;
+	}
+
 	.number1 {
 		color: #44b2f1;
 	}
@@ -111,7 +132,7 @@
 		color: #2ab631;
 	}
 	.number3 {
-		color: #a6be1a;
+		color: #97ad18;
 	}
 	.number4 {
 		color: #f1b444;
@@ -127,5 +148,47 @@
 	}
 	.number8 {
 		color: #8f1d09;
+	}
+
+	.size3,
+	.size3:not(.isClicked):focus,
+	.size3:not(.isClicked):active {
+		width: 70px;
+		height: 70px;
+		font-size: 26px;
+	}
+	.size2,
+	.size2:not(.isClicked):focus,
+	.size2:not(.isClicked):active {
+		width: 45px;
+		height: 45px;
+		font-size: 20px;
+	}
+	.size1,
+	.size1:not(.isClicked):focus,
+	.size1:not(.isClicked):active {
+		width: 30px;
+		height: 30px;
+		font-size: 16px;
+	}
+
+	@media (max-width: 768px) {
+		button,
+		button:not(.isClicked):focus,
+		button:not(.isClicked):active {
+			width: 45px !important;
+			height: 45px !important;
+			font-size: 20px !important;
+		}
+	}
+
+	@media (max-width: 600px) {
+		button,
+		button:not(.isClicked):focus,
+		button:not(.isClicked):active {
+			width: 30px !important;
+			height: 30px !important;
+			font-size: 16px !important;
+		}
 	}
 </style>

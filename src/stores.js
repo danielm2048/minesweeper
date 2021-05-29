@@ -7,3 +7,4 @@ import { writable } from "svelte/store";
 */
 
 export const gameState = writable("playing");
+export const tileSize = writable(3);
