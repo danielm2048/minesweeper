@@ -27,7 +27,7 @@ jobs:
         run: npm i
 
       - name: Config git with email and name
-        run: git config user.name danielm2048 && git config user.email danielmimoun98@gmail.com
+        run: git config user.name danielm2048 && git config user.email "$EMAIL"
 
       - name: Create gh-pages branch
         run: git checkout --orphan gh-pages
