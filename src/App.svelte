@@ -1,11 +1,27 @@
 <script>
 	import { gameState } from "./stores";
+	import { onMount } from "svelte";
 
 	import GameBoard from "./GameBoard.svelte";
 	import GameTile from "./GameTile.svelte";
 	import Timer from "./Timer.svelte";
 	import Size from "./Size.svelte";
 	import Instructions from "./Instructions.svelte";
+
+	let timer = 0;
+	let bestTimes = {
+		easy: null,
+		medium: null,
+		hard: null,
+	};
+
+	onMount(() => {
+		if (localStorage.getItem("best-times")) {
+			bestTimes = JSON.parse(localStorage.getItem("best-times"));
+		} else {
+			localStorage.setItem("best-times", JSON.stringify(bestTimes));
+		}
+	});
 
 	let gameStarted = false;
 	let difficulty = "easy";
@@ -236,13 +252,39 @@
 		gameState.update(() => "won");
 	}
 
+	$: if (
+		$gameState === "won" &&
+		(!bestTimes[difficulty] || timer < bestTimes[difficulty])
+	) {
+		bestTimes[difficulty] = timer;
+		localStorage.setItem("best-times", JSON.stringify(bestTimes));
+	}
+
 	function startOver() {
 		gameStarted = false;
 		gameState.update(() => "playing");
 		gameTiles = [];
 		gameTilesClicked = 0;
 		gameTilesFlagged = 0;
+		timer = 0;
 	}
+
+	function formatTimer(timer) {
+		let minutes = Math.floor(timer / 60);
+		let seconds = Math.floor(timer % 60);
+
+		if (minutes <= 9) {
+			minutes = "0" + minutes;
+		}
+
+		if (seconds <= 9) {
+			seconds = "0" + seconds;
+		}
+
+		return minutes + ":" + seconds;
+	}
+
+	$: console.log(bestTimes[difficulty]);
 </script>
 
 <main>
@@ -264,12 +306,15 @@
 				<option value="medium">Medium</option>
 				<option value="hard">Hard</option>
 			</select>
+			{#if bestTimes[difficulty] !== null}
+				<h2>🏆 Best Time: {formatTimer(bestTimes[difficulty])}</h2>
+			{/if}
 			<button on:click={gameInit}>Start Game!</button>
 		</div>
 	{:else}
 		<h2>💣 {mines - gameTilesFlagged}</h2>
 		<Size />
-		<Timer />
+		<Timer bind:timer {formatTimer} />
 		<GameBoard
 			{gameTiles}
 			on:reveal={handleReveal}
