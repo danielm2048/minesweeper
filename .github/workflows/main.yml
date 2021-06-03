@@ -1,12 +1,12 @@
 name: CI
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -23,23 +23,26 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      - name: Install dependencies
+        run: npm i
+
       - name: Create gh-pages branch
         run: git checkout --orphan gh-pages
-        
+
       - name: Build Svelte app
         run: npm run build
-        
+
       - name: Add build files to branch
         run: git --work-tree public add --all
-        
+
       - name: Commit build files to branch
         run: git --work-tree public commit -m 'Deploy'
-        
+
       - name: Add build files to branch
         run: git push origin HEAD:gh-pages --force
-        
+
       - name: Go back to main branch
         run: git checkout -f main
-        
+
       - name: Delete gh-pages branch
         run: git branch -D gh-pages
