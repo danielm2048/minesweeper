@@ -18,6 +18,6 @@
       "type": "image/png"
     }
   ],
-  "start_url": "/index.html",
+  "start_url": "https://danielm2048.github.io/minesweeper",
   "display": "standalone"
 }

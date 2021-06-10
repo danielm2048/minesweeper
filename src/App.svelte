@@ -283,8 +283,6 @@
 
 		return minutes + ":" + seconds;
 	}
-
-	$: console.log(bestTimes[difficulty]);
 </script>
 
 <main>
