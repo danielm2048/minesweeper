@@ -1,0 +1,21 @@
+{
+  "name": "Minesweeper",
+  "short_name": "Minesweeper",
+  "icons": [
+    {
+      "src": "images/icons/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }, 
+    {
+      "src": "images/icons/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "https://danielm2048.github.io/minesweeper/",
+  "display": "standalone",
+  "scope": "https://danielm2048.github.io/minesweeper/",
+  "background_color": "#3E4EB8",
+  "theme_color": "#2F3BA2"
+}
