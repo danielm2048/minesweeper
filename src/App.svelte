@@ -129,7 +129,7 @@
 		}
 	}
 
-	function revealTiles(i, j) {
+	async function revealTiles(i, j) {
 		if (
 			gameTiles[i] &&
 			gameTiles[i][j] &&
@@ -147,16 +147,18 @@
 				placeMines(i, j);
 			}
 
-			if (gameTiles[i][j].value === "") {
-				revealTiles(i - 1, j - 1);
-				revealTiles(i, j - 1);
-				revealTiles(i + 1, j - 1);
-				revealTiles(i + 1, j);
-				revealTiles(i + 1, j + 1);
-				revealTiles(i, j + 1);
-				revealTiles(i - 1, j + 1);
-				revealTiles(i - 1, j);
-			}
+			setTimeout(() => {
+				if (gameTiles[i][j].value === "") {
+					revealTiles(i - 1, j - 1);
+					revealTiles(i, j - 1);
+					revealTiles(i + 1, j - 1);
+					revealTiles(i + 1, j);
+					revealTiles(i + 1, j + 1);
+					revealTiles(i, j + 1);
+					revealTiles(i - 1, j + 1);
+					revealTiles(i - 1, j);
+				}
+			}, 22);
 		}
 	}
 
@@ -321,6 +323,8 @@
 		/>
 	{/if}
 </main>
+
+<svelte:body on:contextmenu|preventDefault />
 
 <style>
 	main {
